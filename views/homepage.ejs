@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Minified version -->
+    <link rel="stylesheet" href="https://unpkg.com/simpledotcss/simple.min.css">
+
+    <!-- Un-minified version -->
+    <link rel="stylesheet" href="https://unpkg.com/simpledotcss/simple.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <header>
+        <h2><a href="#">Our Wonderful App</a></h2>
+        <nav>
+            <a href="/login">Log In</a>
+        </nav>
+    </header>
+    <main>
+        <form action="/register" method="POST">
+            <% errors.forEach(error=> { %>
+                <p class="notice">
+                    <%= error %>
+                </p>
+                <% })%>
+
+                    <fieldset>
+                        <legend>Create an account</legend>
+                        <label for="username"><small>Username</small></label>
+                        <input type="text" id="Username" name="username" autocomplete="off" placeholder="Username">
+                        <label for="password"><small>Password</small></label>
+                        <input type="password" id="password" name="password" placeholder="password" autocomplete="off">
+                        <br>
+
+                        <button>Sign Up</button>
+                    </fieldset>
+        </form>
+    </main>
+
+
+    <footer>
+        <small>
+            &copy; Our Wonderful App
+        </small>
+    </footer>
+</body>
+
+</html>
