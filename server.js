@@ -1,4 +1,31 @@
 const express = require("express")
+const db = require("better-sqlite3")("ourApp.db")
+
+db.pragma("journal_mode = WAL")
+
+// database setup here
+
+const createTable = db.transaction(() => {
+    db.prepare(`
+            CREATE TABLE IF NOT EXISTS user (
+             id INTEGER PRIMARY KEY AUTOCOMPLETE,
+             username STRING NOT NULL UNIQUE,
+             password STRING NOT NULL
+            )
+        
+        `).run()
+})
+
+
+
+
+
+
+
+
+
+
+
 const app = express()
 const port = 3001
 
@@ -30,7 +57,12 @@ app.post('/register', (req, res) => {
     if (!req.body.username) errors.push("you must provide a username")
     if (req.body.username && req.body.username.length < 3) errors.push("username must have at least 3 characters")
     if (req.body.username && req.body.username.length > 10) errors.push("the length of username must not exceed 10 characters.")
-    if(req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/)) errors.push("username only contains letters and numbers")
+    if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/)) errors.push("username only contains letters and numbers")
+    
+    
+     if (!req.body.password) errors.push("you must provide a password")
+    if (req.body.password && req.body.password.length < 3) errors.push("password must have at least 3 characters")
+    if (req.body.password && req.body.password.length > 10) errors.push("the length of password must not exceed 10 characters.")
 
     if (errors.length) {
         return res.render("homepage", {errors})
