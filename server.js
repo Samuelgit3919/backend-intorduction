@@ -12,17 +12,8 @@ const createTable = db.transaction(() => {
              username STRING NOT NULL UNIQUE,
              password STRING NOT NULL
             )
-        
         `).run()
 })
-
-
-
-
-
-
-
-
 
 
 
