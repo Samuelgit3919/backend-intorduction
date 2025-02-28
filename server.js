@@ -1,79 +1,83 @@
-const express = require("express")
-const db = require("better-sqlite3")("ourApp.db")
+const bcrypt = require("bcrypt");
+const express = require("express");
+const db = require("better-sqlite3")("ourApp.db");
 
-db.pragma("journal_mode = WAL")
+db.pragma("journal_mode = WAL");
 
 // database setup here
 
 const createTables = db.transaction(() => {
-    db.prepare(
-        `
+  db.prepare(
+    `
             CREATE TABLE IF NOT EXISTS users (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              username STRING NOT NULL UNIQUE,
              password STRING NOT NULL
             )
-        `).run()
-})
+        `
+  ).run();
+});
 
-createTables()
+createTables();
 
+const app = express();
+const port = 3001;
 
-const app = express()
-const port = 3001
-
-app.set("view engine", "ejs")
-app.use(express.urlencoded({extended: false}))
-app.use(express.static('public'))
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static("public"));
 
 app.use(function (req, res, next) {
-    res.locals.errors = []
-    next()
-})
+  res.locals.errors = [];
+  next();
+});
 
 app.get("/", (req, res) => {
-    res.render("homepage")
-})
+  res.render("homepage");
+});
 
 app.get("/login", (req, res) => {
-    res.render("login")
-})
+  res.render("login");
+});
 
-app.post('/register', (req, res) => {
-    const errors = []
+app.post("/register", (req, res) => {
+  const errors = [];
 
-    if(typeof req.body.username !== "string") req.body.username=""
-    if (typeof req.body.password !== "string") req.body.password = ""
-    
-    req.body.username = req.body.username.trim()
+  if (typeof req.body.username !== "string") req.body.username = "";
+  if (typeof req.body.password !== "string") req.body.password = "";
 
-    if (!req.body.username) errors.push("you must provide a username")
-    if (req.body.username && req.body.username.length < 3) errors.push("username must have at least 3 characters")
-    if (req.body.username && req.body.username.length > 10) errors.push("the length of username must not exceed 10 characters.")
-    if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/)) errors.push("username only contains letters and numbers")
-    
-    
-     if (!req.body.password) errors.push("you must provide a password")
-    if (req.body.password && req.body.password.length < 3) errors.push("password must have at least 3 characters")
-    if (req.body.password && req.body.password.length > 10) errors.push("the length of password must not exceed 10 characters.")
+  req.body.username = req.body.username.trim();
 
-    if (errors.length) {
-        return res.render("homepage", {errors})
-    } else {
-        res.send("Thank you for filling out the form")
-    }
+  if (!req.body.username) errors.push("you must provide a username");
+  if (req.body.username && req.body.username.length < 3)
+    errors.push("username must have at least 3 characters");
+  if (req.body.username && req.body.username.length > 10)
+    errors.push("the length of username must not exceed 10 characters.");
+  if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/))
+    errors.push("username only contains letters and numbers");
 
+  if (!req.body.password) errors.push("you must provide a password");
+  if (req.body.password && req.body.password.length < 3)
+    errors.push("password must have at least 3 characters");
+  if (req.body.password && req.body.password.length > 10)
+    errors.push("the length of password must not exceed 10 characters.");
 
-    //   save the new user into database
+  if (errors.length) {
+    return res.render("homepage", { errors });
+  }
 
-    const ourStatement = db.prepare("INSERT INTO users (username,password) VALUE (?,?) ")
-    
-    ourStatement.run(req.body.username, req.body.password)
+  //   save the new user into database
 
-    // log the user in by giving them a cookie
+  const salt = bcrypt.genSaltSync(10);
+  req.body.password = bcrypt.hashSync(req.body.password, salt);
 
+  const ourStatement = db.prepare(
+    "INSERT INTO users (username, password) VALUES (?,?)"
+  );
+  ourStatement.run(req.body.username, req.body.password);
 
-}) 
+  // log the user in by giving them a cookie
+  res.send("Thank you");
+});
 
-
-app.listen(port)
+app.listen(port);
