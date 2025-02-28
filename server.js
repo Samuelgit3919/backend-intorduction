@@ -5,16 +5,18 @@ db.pragma("journal_mode = WAL")
 
 // database setup here
 
-const createTable = db.transaction(() => {
-    db.prepare(`
-            CREATE TABLE IF NOT EXISTS user (
-             id INTEGER PRIMARY KEY AUTOCOMPLETE,
+const createTables = db.transaction(() => {
+    db.prepare(
+        `
+            CREATE TABLE IF NOT EXISTS users (
+             id INTEGER PRIMARY KEY AUTOINCREMENT,
              username STRING NOT NULL UNIQUE,
              password STRING NOT NULL
             )
         `).run()
 })
 
+createTables()
 
 
 const app = express()
@@ -60,6 +62,15 @@ app.post('/register', (req, res) => {
     } else {
         res.send("Thank you for filling out the form")
     }
+
+
+    //   save the new user into database
+
+    const ourStatement = db.prepare("INSERT INTO users (username,password) VALUE (?,?) ")
+    
+    ourStatement.run(req.body.username, req.body.password)
+
+    // log the user in by giving them a cookie
 
 
 }) 
